@@ -9,6 +9,10 @@
   <version>1.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
+  <modules>
+    <module>payment</module>
+  </modules>
+
   <!--统一管理jar包版本-->
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -22,7 +26,7 @@
     <mybatis.spring.boot.version>1.3.0</mybatis.spring.boot.version>
   </properties>
 
-  <!--子模块继承之后，提供作用：锁定版本+子module不用groupId和version-->
+  <!--子模块继承之后，提供作用：锁定版本+子module不用groupId和version 只是申明， 并不实现引入-->
   <dependencyManagement>
     <dependencies>
       <!--spring boot 2.2.2-->
