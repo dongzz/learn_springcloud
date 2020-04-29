@@ -119,4 +119,28 @@ eureka 集群部署（互相注册，相互守望）
           defaultZone: http://localhost:7001/eureka,http://www.dongz.com:7002/eureka/
     ```
     
+    ### eureka 服务发现
+    -   Application新增注解
+    ```java
+        @EnableDiscoveryClient
+    ```
+    -   获取discoveryClient 对象
+    ```java
+        @Resource
+        private DiscoveryClient discoveryClient;
+    ```
+    -   获取eureka服务对象列表
+    ```java
+    @GetMapping("/getDiscovery")
+    public List<String> getDiscovery() {
+        return discoveryClient.getServices();
+    }
+    ```
+    -   获取服务对象实例信息
+    ```java
+    @GetMapping("/getServiceInfo/{name}")
+    public List<ServiceInstance> getServiceInfo(@PathVariable String name) {
+        return discoveryClient.getInstances(name);
+    }
+    ```
     
