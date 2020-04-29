@@ -55,6 +55,11 @@ eureka 单节点
         fetch-registry: true
         service-url:
           defaultZone: http://localhost:7001/eureka
+      instance:
+          # 修改主机名
+          instance-id: payment-01
+          # 访问路径可以显示ip地址
+          prefer-ip-address: true
     ```
     -   java
     ```java
