@@ -39,6 +39,6 @@ public class PaymentController {
         if (payment == null) {
             return new Result<>(444, "查询失败");
         }
-        return new Result<>(200, "插入成功", payment);
+        return new Result<>(200, "查询成功", payment);
     }
 }
