@@ -12,8 +12,8 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>modules/eureka-server</module>
-        <module>modules/eureka-server2</module>
+        <module>eureka/eureka-server</module>
+        <module>eureka/eureka-server2</module>
     </modules>
 
 
