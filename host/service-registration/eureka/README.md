@@ -144,3 +144,17 @@ eureka 集群部署（互相注册，相互守望）
     }
     ```
     
+### eureka 自我保护机制
+默认情况下EurekaClient定时向EurekaServer端发送心跳包
+如果Eureka在server端在一定时间内（默认90秒）没有收到EurekaClient发送心跳包，
+便会直接从服务注册列表中剔除该服务，但是短时间（90秒内）内丢失了大量的服务实例细心跳，
+这时候EurekaServer会开启自我保护机制，不会剔除该服务。
+在自我保护模式中，Eureka Server会保护服务注册表中的信息，不会注销任何服务实例。
+
+#### 禁止自我保护
+```yaml
+eureka:
+  server:
+    # 关闭自我保护机制，保证不可用服务被及时剔除
+    enable-self-preservation: false
+```
