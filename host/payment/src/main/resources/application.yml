@@ -3,7 +3,7 @@ server:
 
 spring:
   profiles:
-    active: zookeeper
+    active: consul
   application:
     name: payment-service
   datasource:

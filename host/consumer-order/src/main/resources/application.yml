@@ -5,4 +5,4 @@ spring:
   application:
     name: consumer-order
   profiles:
-    active: zookeeper
+    active: consul

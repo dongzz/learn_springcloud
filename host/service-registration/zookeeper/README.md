@@ -1,6 +1,9 @@
 # 服务注册
 zookeeper 代替 eureka
 
+## 简介
+zookeeper是一个分布式协调工具，可以实现注册中心功能
+
 ## 服务器
 -   安装zookeeper服务器（docker安装，略）
 
