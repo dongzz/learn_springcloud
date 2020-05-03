@@ -34,3 +34,8 @@ public class PaymentApplication {
     }
 }
 ```
+
+-   查看zookeeper状态
+```
+    echo stat | nc 127.0.0.1 2181
+```
