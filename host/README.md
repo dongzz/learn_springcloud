@@ -26,3 +26,5 @@ public class ApplicationContextConfig {
 
 ## service-registration
 服务注册
+-   eureka (停更)
+-   zookeeper
