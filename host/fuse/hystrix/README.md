@@ -95,5 +95,50 @@ public class PaymentApplication {
         SpringApplication.run(PaymentApplication.class, args);
     }
 }
+```
+### (2) 消费者服务降级
+-   pom
+    同上
+-   yml
+```yaml
+#yml添加配置,开启 hystrix
+feign:
+ hystrix:
+   enabled: true
+```
+-   application
+    -   @EnableHystrix
+```java
+@SpringBootApplication
+@EnableDiscoveryClient
+@EnableFeignClients //开启Feign
+@EnableHystrix
+public class ConsumerOrderController {
 
+    public static void main(String[] args) {
+        SpringApplication.run(ConsumerOrderController.class, args);
+    }
+}
+
+```
+-   业务类
+```java
+public class OrderController {
+
+    @Resource
+    PaymentService service;
+
+    @GetMapping("/getById/{id}")
+    public Result<Payment> getById(@PathVariable("id") Long id) {
+        return restTemplate.getForObject(PAYMENT_URL + "/api/pay/getById/" + id, Result.class);
+    }
+
+    @HystrixCommand(fallbackMethod = "getById",commandProperties = {
+            @HystrixProperty(name = "execution.isolation.thread.timeoutInMilliseconds",value = "3000")
+    })
+    @GetMapping("/getById2/{id}")
+    public Result<Payment> getById2(@PathVariable("id") Long id) {
+        return service.getById2(id);
+    }
+}
 ```

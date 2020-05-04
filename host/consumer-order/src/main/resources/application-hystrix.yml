@@ -1,0 +1,4 @@
+#yml添加配置,开启 hystrix
+feign:
+  hystrix:
+    enabled: true

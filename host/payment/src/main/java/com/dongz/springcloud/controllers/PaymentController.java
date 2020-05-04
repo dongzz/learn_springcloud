@@ -48,7 +48,7 @@ public class PaymentController {
         if (payment == null) {
             return new Result<>(444, "查询失败");
         }
-        log.info("method 1； 线程池，线程ID：" + Thread.currentThread().getId() + ",线程name：" + Thread.currentThread().getName());
+        log.info("method 1； 线程池，线程池ID：" + Thread.currentThread().getId() + ",线程池name：" + Thread.currentThread().getName());
         return new Result<>(200, "查询成功", payment);
     }
 
@@ -68,7 +68,7 @@ public class PaymentController {
         if (payment == null) {
             return new Result<>(444, "查询失败");
         }
-        log.info("method 2；线程池，线程ID：" + Thread.currentThread().getId() + ",线程name：" + Thread.currentThread().getName());
+        log.info("method 2；线程池，线程池ID：" + Thread.currentThread().getId() + ",线程池name：" + Thread.currentThread().getName());
         return new Result<>(200, "查询成功", payment);
     }
 

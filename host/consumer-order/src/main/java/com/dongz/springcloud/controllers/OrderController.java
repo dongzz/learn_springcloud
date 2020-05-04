@@ -3,10 +3,13 @@ package com.dongz.springcloud.controllers;
 import com.dongz.springcloud.entities.Payment;
 import com.dongz.springcloud.services.PaymentService;
 import com.dongz.springcloud.utils.Result;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixProperty;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
 import javax.annotation.Resource;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author dong
@@ -37,5 +40,14 @@ public class OrderController {
     @GetMapping("/getById2/{id}")
     public Result<Payment> getById2(@PathVariable("id") Long id) {
         return service.getById2(id);
+    }
+
+    @HystrixCommand(fallbackMethod = "getById",commandProperties = {
+            @HystrixProperty(name = "execution.isolation.thread.timeoutInMilliseconds",value = "3000")
+    })
+    @GetMapping("/getById3/{id}")
+    public Result<Payment> getById3(@PathVariable("id") Long id) throws InterruptedException {
+        TimeUnit.SECONDS.sleep(4);
+        return service.getById(id);
     }
 }
