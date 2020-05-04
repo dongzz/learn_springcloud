@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author dong
@@ -40,6 +41,11 @@ public class PaymentController {
 
     @GetMapping("/getById/{id}")
     public Result<Payment> getById(@PathVariable Long id) {
+        try {
+            TimeUnit.SECONDS.sleep(5);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         Payment payment = paymentService.getPaymentById(id);
 
         if (payment == null) {
