@@ -61,3 +61,7 @@ public class ApplicationContextConfig {
     -   Riak
 
 Zookeeper、Consul注册的微服务是一个临时节点，只要微服务不可用，发心跳测试收不到了，就迅速剔除微服务，微服务恢复过来以后，会重新换一个serviceID。
+
+
+## load-balancing
+负载均衡
