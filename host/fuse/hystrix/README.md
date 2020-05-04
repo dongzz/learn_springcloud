@@ -142,3 +142,93 @@ public class OrderController {
     }
 }
 ```
+### 问题1：
+这样如果每个业务方法都对应一个兜底的方法，100个方法就有100个服务降级，会出现代码膨胀问题，我们需要一个统一的 fallbackMethod，统一的和自定义的分开。
+
+#### 解决问题：
+-   @DefaultProperties(defaultFallback = "")
+    -   1 : 1 每个方法配置一个服务降级方法，造成代码膨胀
+    -   1 : N 除了个别重要核心业务有专属，其他普通的可以通过@DefaultProperties(defaultFallback = “”) 统一跳转到统一处理结果页面
+这样通用的和独享的各自分开，避免了代码膨胀，合理减少了代码量。
+
+#### (1) 服务提供者服务降级
+-   业务类
+    -   @DefaultProperties(defaultFallback = "getById") // 设置全局fallback方法
+    -   @HystrixCommand
+```java
+@RestController
+@RequestMapping("/api/pay")
+@Slf4j
+@DefaultProperties(defaultFallback = "getById")
+public class PaymentController {
+
+    @GetMapping("/getById/{id}")
+    public Result<Payment> getById(@PathVariable Long id) {
+        Payment payment = paymentService.getPaymentById(id);
+
+        if (payment == null) {
+            return new Result<>(444, "查询失败");
+        }
+        log.info("method 1； 线程池，线程池ID：" + Thread.currentThread().getId() + ",线程池name：" + Thread.currentThread().getName());
+        return new Result<>(200, "查询成功", payment);
+    }
+
+    @GetMapping("/getById2/{id}")
+    @HystrixCommand
+    public Result<Payment> getById2(@PathVariable Long id) {
+        try {
+            TimeUnit.SECONDS.sleep(3);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        Payment payment = paymentService.getPaymentById(id);
+
+        if (payment == null) {
+            return new Result<>(444, "查询失败");
+        }
+        log.info("method 2；线程池，线程池ID：" + Thread.currentThread().getId() + ",线程池name：" + Thread.currentThread().getName());
+        return new Result<>(200, "查询成功", payment);
+    }
+}
+```
+
+### 问题2：
+现在客户端与服务端关系紧紧耦合，客户端能跑是因为接口调用了微服务的业务逻辑方法，我们如果针对客户端接口做一些处理，把它调用的所有微服务方法进行降级，就可以解决耦合问题。
+
+#### 解决问题：
+这个案例服务降级处理是在客户端80完成的，与服务端8001没有关系，只需要为 Feign 客户端定义的接口添加一个服务降级处理的实现类即可实现解耦。
+
+#### (2) 消费者服务降级
+-   业务类
+    -   使用@FeignClient(fallback = xxx.class)指定哪个类来处理异常
+```java
+@Component
+@FeignClient(value = "payment-service", fallback = PaymentServiceFallback.class)  //指定调用哪个微服务
+public interface PaymentService {
+    @GetMapping("/api/pay/getById/{id}")
+    Result<Payment> getById(@PathVariable("id") Long id) ;
+
+    @GetMapping("/api/pay/getById2/{id}")
+    Result<Payment> getById2(@PathVariable("id") Long id) ;
+}
+
+```
+-   全局处理类
+```java
+@Component
+@Slf4j
+public class PaymentServiceFallback implements PaymentService {
+
+    @Override
+    public Result<Payment> getById(Long id) {
+        log.error("访问异常，getById");
+        return null;
+    }
+
+    @Override
+    public Result<Payment> getById2(Long id) {
+        log.error("访问异常，getById2");
+        return null;
+    }
+}
+```

@@ -1,6 +1,7 @@
 package com.dongz.springcloud.services;
 
 import com.dongz.springcloud.entities.Payment;
+import com.dongz.springcloud.services.fallback.PaymentServiceFallback;
 import com.dongz.springcloud.utils.Result;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.stereotype.Component;
@@ -13,7 +14,7 @@ import org.springframework.web.bind.annotation.PathVariable;
  * @desc
  */
 @Component
-@FeignClient(value = "payment-service")  //指定调用哪个微服务
+@FeignClient(value = "payment-service", fallback = PaymentServiceFallback.class)  //指定调用哪个微服务
 public interface PaymentService {
     @GetMapping("/api/pay/getById/{id}")
     Result<Payment> getById(@PathVariable("id") Long id) ;

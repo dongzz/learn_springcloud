@@ -3,6 +3,7 @@ package com.dongz.springcloud.controllers;
 import com.dongz.springcloud.entities.Payment;
 import com.dongz.springcloud.services.PaymentService;
 import com.dongz.springcloud.utils.Result;
+import com.netflix.hystrix.contrib.javanica.annotation.DefaultProperties;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixProperty;
 import lombok.extern.slf4j.Slf4j;
@@ -22,6 +23,7 @@ import java.util.concurrent.TimeUnit;
 @RestController
 @RequestMapping("/api/pay")
 @Slf4j
+@DefaultProperties(defaultFallback = "getById")
 public class PaymentController {
 
     @Resource
@@ -53,10 +55,7 @@ public class PaymentController {
     }
 
     @GetMapping("/getById2/{id}")
-    @HystrixCommand(fallbackMethod = "getById",commandProperties = {
-            //设置这个线程的超时时间是3s，3s内是正常的业务逻辑，超过3s调用fallbackMethod指定的方法进行处理
-            @HystrixProperty(name = "execution.isolation.thread.timeoutInMilliseconds",value = "3000")
-    })
+    @HystrixCommand
     public Result<Payment> getById2(@PathVariable Long id) {
         try {
             TimeUnit.SECONDS.sleep(3);
