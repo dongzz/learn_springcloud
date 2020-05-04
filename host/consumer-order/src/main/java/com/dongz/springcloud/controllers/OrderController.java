@@ -36,6 +36,6 @@ public class OrderController {
 
     @GetMapping("/getById2/{id}")
     public Result<Payment> getById2(@PathVariable("id") Long id) {
-        return service.getById(id);
+        return service.getById2(id);
     }
 }

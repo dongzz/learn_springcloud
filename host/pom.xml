@@ -15,6 +15,7 @@
     <module>api-commons</module>
     <module>service-registration</module>
       <module>load-balancing</module>
+      <module>fuse</module>
   </modules>
 
   <!--统一管理jar包版本-->
