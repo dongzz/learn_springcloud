@@ -1,6 +1,7 @@
 package com.dongz.springcloud.controllers;
 
 import com.dongz.springcloud.entities.Payment;
+import com.dongz.springcloud.services.PaymentService;
 import com.dongz.springcloud.utils.Result;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
@@ -17,6 +18,8 @@ import javax.annotation.Resource;
 public class OrderController {
 
     public static final String PAYMENT_URL = "http://payment-service";
+    @Resource
+    PaymentService service;
 
     @Resource
     private RestTemplate restTemplate;
@@ -29,5 +32,10 @@ public class OrderController {
     @GetMapping("/getById/{id}")
     public Result<Payment> getById(@PathVariable("id") Long id) {
         return restTemplate.getForObject(PAYMENT_URL + "/api/pay/getById/" + id, Result.class);
+    }
+
+    @GetMapping("/getById2/{id}")
+    public Result<Payment> getById2(@PathVariable("id") Long id) {
+        return service.getById(id);
     }
 }

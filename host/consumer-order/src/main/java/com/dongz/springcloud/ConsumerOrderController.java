@@ -5,6 +5,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.cloud.netflix.ribbon.RibbonClient;
+import org.springframework.cloud.openfeign.EnableFeignClients;
 //import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
 
 /**
@@ -15,7 +16,8 @@ import org.springframework.cloud.netflix.ribbon.RibbonClient;
 @SpringBootApplication
 //@EnableEurekaClient
 @EnableDiscoveryClient
-@RibbonClient(name = "CLOUD-PROVIDER-SERVICE",configuration = MySelfRule.class)
+//@RibbonClient(name = "payment-service",configuration = MySelfRule.class)
+@EnableFeignClients //开启Feign
 public class ConsumerOrderController {
 
     public static void main(String[] args) {

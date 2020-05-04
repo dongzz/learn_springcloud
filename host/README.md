@@ -65,3 +65,5 @@ Zookeeper、Consul注册的微服务是一个临时节点，只要微服务不�
 
 ## load-balancing
 负载均衡
+-   ribbon
+-   openFeign
