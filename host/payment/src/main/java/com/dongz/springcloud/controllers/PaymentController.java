@@ -42,7 +42,7 @@ public class PaymentController {
     @GetMapping("/getById/{id}")
     public Result<Payment> getById(@PathVariable Long id) {
         try {
-            TimeUnit.SECONDS.sleep(5);
+            TimeUnit.SECONDS.sleep(3);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

@@ -117,3 +117,34 @@ ribbon:
   #指的是建立连接后从服务器读取到可用资源所用的时间
   ConnectTimeout: 5000
 ```
+
+## 日志
+
+### 日志功能：
+Feign 提供了日志打印功能，可以通过配置来调整日志级别，从而了解 Feign 中 Http 请求的细节。
+说白了就是对接口的调用情况进行监控和输出
+
+### 日志级别：
+-   NONE：默认的，不显示任何日志
+-   BASIC：仅记录请求方法、URL、响应状态码及执行时间
+-   HEADERS：除了 BASIC 中定义的信息之外，还有请求和响应的头信息
+-   FULL：除了 HEADERS 中定义的信息之外，还有请求和响应的正文及元数据
+
+### 客户端
+-   日志Bean
+```java
+@Configuration
+public class FeignConfig {
+    @Bean
+    Logger.Level feignLoggerLevel(){
+        return Logger.Level.FULL;
+    }
+}
+```
+-   yml
+```yaml
+logging:
+  level:
+    #feign日志以什么级别监控哪个接口
+    com.dongz.springcloud.services.PaymentService: debug
+```
