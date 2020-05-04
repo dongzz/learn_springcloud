@@ -347,12 +347,23 @@ public class PaymentController {
 </project>
 ```
 -   application
+    -   @EnableHystrixDashboard
 ```java
 @SpringBootApplication
 @EnableHystrixDashboard
 public class DashBoardApplication {
     public static void main(String[] args) {
         SpringApplication.run(DashBoardApplication.class, args);
+}
+```
+-   client application
+```java
+@SpringBootApplication
+@EnableDiscoveryClient
+@EnableCircuitBreaker
+public class PaymentApplication {
+    public static void main(String[] args) {
+        SpringApplication.run(PaymentApplication.class, args);
     }
 
     //主启动类添加代码
