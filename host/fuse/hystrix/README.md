@@ -232,3 +232,143 @@ public class PaymentServiceFallback implements PaymentService {
     }
 }
 ```
+
+## 熔断机制概述：
+   
+   熔断机制是应对雪崩效应的一种微服务链路保护机制。当扇出链路的某个微服务出错不可用或者响应时间太长时，会进行服务的降级，进而熔断该节点微服务的调用，快速返回错误的响应信息。
+   当检测到该节点微服务调用响应正常后，恢复调用链路。
+   
+   在SpringCloud框架里，熔断机制通过Hystrix实现，Hystrix会监控微服务间调用的状况，当失败的调用到一定阈值，缺省是5秒内20次调用失败，就会启动熔断机制。熔断机制的注解是@HystrixCommand
+
+### 服务的降级 --> 进而熔断 --> 恢复调用链路
+
+### 总结：
+-   熔断类型
+    -   熔断打开
+        请求不再进行调用当前服务，内部设置时钟一般为MTTR（平均故障处理时间），当打开时长达到所设时钟则进入半熔断状态
+    -   熔断关闭
+        熔断关闭不会对服务进行调用
+    -   熔断半开
+        部分请求根据规则调用当前服务，如果请求成功且符合规则则认为当前服务恢复正常，关闭熔断
+-   断路器在什么情况下开始起作用
+    设计到断路器的三个重要参数：快照时间窗、请求总数阈值、错误百分比阈值
+    -   1.快照时间窗：断路器确定是否打开需要统计一些请求和错误数据，而统计的时间范围就是快照时间窗，默认为最近的10秒
+    -   2.请求总数阈值：在快照时间内，必须满足请求总数阈值才有资格熔断。默认为20，意味着在10秒内，如果该hystrix命令的调用次数不足20次，即使所有的请求都超时或其他原因失败，断路器都不会打开
+    -   3.错误百分比阈值：当请求总数在快照时间窗内超过阈值，比如发生了30次调用，如果在这30次调用中，有15次发生了超时异常，也就是超过50%的错误百分比，在默认设定50%阈值情况下，这时候就会将断路器打开
+
+-   断路器开启或关闭的条件
+    -   1.当满足一定的阈值的时候（默认10秒内超过20个请求次数）
+    -   2.当失败率达到一定的时候（默认10秒内超过50%的请求失败）
+    -   3.到达以上阈值，断路器将会开启
+    -   4.当开启的时候，所有请求都不会进行转发
+    -   5.一段时间后（默认是5秒），这个时候断路器是半开状态，会让其中一个请求进行转发。如果成功，断路器会关闭，若失败，继续开启。重复4和5。
+
+-   断路器打开之后
+    -   1.再有请求调用的时候，将不会调用主逻辑，而是直接调用降级fallback。通过断路器，实现了自动地发现错误并将降级逻辑切换为主逻辑，减少响应延迟的效果。
+    -   2.原来的主逻辑要如何恢复呢？
+对于这一问题，hystrix也为我们实现了自动恢复功能
+当断路器打开，对主逻辑进行熔断之后，hystrix会启动一个休眠时间窗，在这个时间窗内，降级逻辑是临时的成为主逻辑，当休眠时间窗到期，熔断器将进入半开状态，释放一次请求到原来的主逻辑上，如果此次请求正常返回，那么断路器将继续闭合，主逻辑恢复，如果这次请求依然有问题，断路器继续进入打开状态，休眠时间窗重新计时。
+
+#### 案例
+-   HystrixCommandProperties.class
+##### 服务端
+```java
+@RestController
+@RequestMapping("/api/pay")
+@Slf4j
+public class PaymentController {
+    // ==== 服务熔断
+    @GetMapping("/paymentCircuitBreaker/{id}")
+    @HystrixCommand(fallbackMethod = "paymentCircuitBreakerFallback", commandProperties = {
+            @HystrixProperty(name = "circuitBreaker.enabled", value = "true"),//是否开启断路器
+            @HystrixProperty(name = "circuitBreaker.requestVolumeThreshold", value = "10"),//请求次数
+            @HystrixProperty(name = "circuitBreaker.sleepWindowInMilliseconds", value = "10000"),//时间窗口期（时间范围）
+            @HystrixProperty(name = "circuitBreaker.errorThresholdPercentage", value = "60"),//失败率达到多少后跳闸
+    })
+    public String paymentCircuitBreaker(@PathVariable("id") Long id) {
+
+        if (id < 0) {
+            throw new RuntimeException("id 不能为负");
+        }
+        return "线程池：" + Thread.currentThread().getName() + "流水号" + IdUtil.simpleUUID();
+    }
+
+    public String paymentCircuitBreakerFallback(@PathVariable("id") Long id) {
+        return "id不能为负，线程池：" + Thread.currentThread().getName() + "流水号" + IdUtil.simpleUUID();
+    }
+}
+```
+
+## Hystrix 图形化Dashboard搭建及监控测试
+除了隔离依赖服务的调用意外，Hystrix还提供了准实时的调用监控（Hystrix Dashboard），Hystrix会持续的记录所有通过Hystrix发起的请求的执行信息，并以统计报表和图形的形式展示给用户，包括每秒执行多少请求多少成功，多少失败等。Netflix 通过 hystrix-metrics-event-stream项目实现了对以上指标的监控。SpringCloud也提供了Hystrix Dashboard的整合，对监控内容转化成可视化界面。
+
+### 搭建
+-   pom
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>fuse</artifactId>
+        <groupId>org.dongz.springcloud</groupId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>dashboard</artifactId>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-netflix-hystrix-dashboard</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-devtools</artifactId>
+            <scope>runtime</scope>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+</project>
+```
+-   application
+```java
+@SpringBootApplication
+@EnableHystrixDashboard
+public class DashBoardApplication {
+    public static void main(String[] args) {
+        SpringApplication.run(DashBoardApplication.class, args);
+    }
+
+    //主启动类添加代码
+    /**
+     * 此配置是为了服务监控而配置，与服务容错本身无关,SpringCloud升级后的坑
+     * ServletRegistrationBean因为springboot的默认路径不是"/hystrix.stream"，
+     * 只要在自己的项目里配置上下面的servlet就可以了
+     */
+    @Bean
+    public ServletRegistrationBean getServlet(){
+        HystrixMetricsStreamServlet streamServlet = new HystrixMetricsStreamServlet();
+        ServletRegistrationBean registrationBean = new ServletRegistrationBean(streamServlet);
+        registrationBean.setLoadOnStartup(1);
+        registrationBean.addUrlMappings("/hystrix.stream");
+        registrationBean.setName("HystrixMetricsStreamServlet");
+        return registrationBean;
+    }
+}
+```
