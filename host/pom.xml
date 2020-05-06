@@ -4,7 +4,7 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>org.dongz.springcloud</groupId>
+  <groupId>com.dongz.springcloud</groupId>
   <artifactId>host</artifactId>
   <version>1.0-SNAPSHOT</version>
   <packaging>pom</packaging>
@@ -14,8 +14,9 @@
     <module>consumer-order</module>
     <module>api-commons</module>
     <module>service-registration</module>
-      <module>load-balancing</module>
-      <module>fuse</module>
+    <module>load-balancing</module>
+    <module>fuse</module>
+    <module>service-gateway</module>
   </modules>
 
   <!--统一管理jar包版本-->

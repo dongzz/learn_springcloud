@@ -7,14 +7,12 @@
         <groupId>com.dongz.springcloud</groupId>
         <version>1.0-SNAPSHOT</version>
     </parent>
+
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>service-registration</artifactId>
+    <artifactId>service-gateway</artifactId>
     <packaging>pom</packaging>
 
     <modules>
-        <module>eureka/eureka-server</module>
-        <module>eureka/eureka-server2</module>
+        <module>./gateway/gateway</module>
     </modules>
-
-
 </project>

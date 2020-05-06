@@ -311,7 +311,7 @@ public class PaymentController {
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>fuse</artifactId>
-        <groupId>org.dongz.springcloud</groupId>
+        <groupId>com.dongz.springcloud</groupId>
         <version>1.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
